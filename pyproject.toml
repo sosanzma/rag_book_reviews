@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "rag_book_reviews"
+version = "0.1.0"
+description = "RAG_book_reviews using crewAI"
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<=3.13"
+crewai = { extras = ["tools"], version = "^0.51.0" }
+
+[tool.poetry.scripts]
+rag_book_reviews = "rag_book_reviews.main:run"
+run_crew = "rag_book_reviews.main:run"
+train = "rag_book_reviews.main:train"
+replay = "rag_book_reviews.main:replay"
+test = "rag_book_reviews.main:test"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
