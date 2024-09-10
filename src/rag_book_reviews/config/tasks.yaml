@@ -36,3 +36,7 @@ delete_data_task:
 handle_user_query:
   description: Interact with the user, understand their query, and provide a response using the RAG system
   expected_output: A relevant and informative response to the user's query about the book
+
+continuous_chat:
+  description: "Engage in a continuous conversation with the user, answering questions about books based on the gathered and processed information in the RAG system."
+  expected_output: "A relevant and informative response to the user's query about the book, based on the information in the RAG system."
