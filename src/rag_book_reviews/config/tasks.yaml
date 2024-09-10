@@ -3,14 +3,14 @@ gather_goodreads_reviews_task:
     Find and summarize opinions from Goodreads reviews on the book: {book_title}. 
     Always include the name of the book, the author, and the Goodreads rating.
   expected_output: >
-    Summaries of Goodreads reviews on each book and the links to the reviews.
+    Summaries of Goodreads reviews for the book and the links to the reviews.
 
 gather_reddit_reviews_task:
   description: >
-    Find and summarize opinions from Reddit discussions on the book {book_title}. 
+    Find and summarize opinions from Reddit discussions for the book {book_title}. 
     Provide the title of the book and the subreddit where the discussion is taking place.
   expected_output: >
-    Summaries of Reddit discussions on each book and the links to the discussions. 
+    Summaries of Reddit discussions for the book and the links to the discussions. 
     Mention the title of the book and the subreddit where the discussion is taking place.
 
 process_opinion_data:

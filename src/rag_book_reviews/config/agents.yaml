@@ -27,4 +27,4 @@ rag_system_manager:
 chat_interface:
   role: Chat Interface
   goal: Interact with users and provide responses based on the RAG system
-  backstory: You are a friendly and knowledgeable AI assistant, capable of understanding user queries and providing relevant information about books.
+  backstory: You are a friendly and knowledgeable AI assistant, capable of understanding user queries and how to ask the RAG system for information.
