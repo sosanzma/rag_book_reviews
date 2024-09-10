@@ -31,7 +31,7 @@ class BookReviewCrew:
     def create_rag_tool(self):
         return RagTool(
             name="Book Knowledge Base",
-            description="A knowledge base for storing and retrieving book-related information.",
+            description="A knowledge base for storing and retrieving book-related information as well as opinions from Goodreads and Reddit.",
             summarize=True
         )
 
@@ -44,7 +44,9 @@ class BookReviewCrew:
             backstory=config['backstory'],
             tools=[SerperDevTool()],
             verbose=True,
-            llm=self.get_llm('gpt-4')
+            llm=self.get_llm('gpt-4o'),
+            max_iterations=100,
+            timeout=120
         )
 
     @agent
@@ -56,7 +58,9 @@ class BookReviewCrew:
             backstory=config['backstory'],
             tools=[SerperDevTool()],
             verbose=True,
-            llm=self.get_llm('gpt-4')
+            llm=self.get_llm('gpt-4o'),
+            max_iterations=100,
+            timeout=120
         )
 
     @agent
@@ -67,7 +71,9 @@ class BookReviewCrew:
             goal=config['goal'],
             backstory=config['backstory'],
             verbose=True,
-            llm=self.get_llm('gpt-4')
+            llm=self.get_llm('gpt-4o-mini'),
+            max_iterations=100,
+            timeout=120
         )
 
     @agent
@@ -79,7 +85,9 @@ class BookReviewCrew:
             backstory=config['backstory'],
             tools=[self.rag_tool],
             verbose=True,
-            llm=self.get_llm('gpt-4')
+            llm=self.get_llm('gpt-4o'),
+            max_iterations=100,
+            timeout=120
         )
 
     @agent
@@ -90,23 +98,25 @@ class BookReviewCrew:
             goal=config['goal'],
             backstory=config['backstory'],
             verbose=True,
-            llm=self.get_llm('gpt-4')
+            llm=self.get_llm('gpt-4o-mini'),
+            max_iterations=100,
+            timeout=120
         )
 
     @task
-    def gather_goodreads_reviews_task(self, book_title: str) -> Task:
+    def gather_goodreads_reviews_task(self) -> Task:
         config = self.tasks_config['gather_goodreads_reviews_task']
         return Task(
-            description=config['description'].format(book_title=book_title),
+            description=config['description'],
             agent=self.searcher_goodreads(),
             expected_output=config['expected_output']
         )
 
     @task
-    def gather_reddit_reviews_task(self, book_title: str) -> Task:
+    def gather_reddit_reviews_task(self) -> Task:
         config = self.tasks_config['gather_reddit_reviews_task']
         return Task(
-            description=config['description'].format(book_title=book_title),
+            description=config['description'],
             agent=self.reddit_reviewer(),
             expected_output=config['expected_output']
         )
@@ -121,23 +131,23 @@ class BookReviewCrew:
         )
 
     @task
-    def insert_data_task(self, data: str) -> Task:
+    def insert_data_task(self) -> Task:
         config = self.tasks_config['insert_data_task']
         return Task(
-            description=f"{config['description']}: {data}",
+            description=config['description'],
             agent=self.rag_system_manager(),
             expected_output=config['expected_output']
         )
 
     @task
-    def query_database_task(self, query: str) -> Task:
+    def query_database_task(self) -> Task:
         config = self.tasks_config['query_database_task']
         return Task(
-            description=f"{config['description']}: '{query}'",
+            description=config['description'],
             agent=self.rag_system_manager(),
             expected_output=config['expected_output']
         )
-
+    """
     @task
     def update_data_task(self, identifier: str, new_data: str) -> Task:
         config = self.tasks_config['update_data_task']
@@ -155,30 +165,20 @@ class BookReviewCrew:
             agent=self.rag_system_manager(),
             expected_output=config['expected_output']
         )
+    """
 
     @task
-    def handle_user_query(self, query: str) -> Task:
+    def handle_user_query(self) -> Task:
         config = self.tasks_config['handle_user_query']
         return Task(
-            description=f"{config['description']}: '{query}'",
+            description=config['description'],
             agent=self.chat_interface(),
             expected_output=config['expected_output']
         )
 
     @crew
-    def run_crew(self, book_title: str, user_query: str = None) -> Crew:
-        """Assemble and run the Book Review Crew"""
-        tasks = [
-            self.gather_goodreads_reviews_task(book_title),
-            self.gather_reddit_reviews_task(book_title),
-            self.process_opinion_data(),
-            self.insert_data_task("Processed opinion data")
-        ]
-        
-        if user_query:
-            tasks.append(self.query_database_task(user_query))
-            tasks.append(self.handle_user_query(user_query))
-
+    def crew(self) -> Crew:
+        """Creates the Book Review Crew"""
         return Crew(
             agents=[
                 self.searcher_goodreads(),
@@ -187,7 +187,14 @@ class BookReviewCrew:
                 self.rag_system_manager(),
                 self.chat_interface()
             ],
-            tasks=tasks,
+            tasks=[
+                self.gather_goodreads_reviews_task(),
+                self.gather_reddit_reviews_task(),
+                self.process_opinion_data(),
+                self.insert_data_task(),
+                self.query_database_task(),
+                self.handle_user_query()
+            ],
             process=Process.sequential,
             verbose=True
         )
