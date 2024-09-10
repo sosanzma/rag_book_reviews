@@ -14,6 +14,7 @@ class BookReviewCrew:
         self.agents_config = self.load_config('agents.yaml')
         self.tasks_config = self.load_config('tasks.yaml')
         self.rag_tool = self.create_rag_tool()
+        self.conversation_active = True
 
     def load_config(self, filename):
         config_path = os.path.join(self.base_path, 'config', filename)
@@ -21,12 +22,17 @@ class BookReviewCrew:
             return yaml.safe_load(file)
 
     def get_llm(self, model_name):
+        print(f"Attempting to get LLM for model: {model_name}")
         if model_name.startswith('gpt'):
-            return ChatOpenAI(model_name=model_name)
+            llm = ChatOpenAI(model_name=model_name)
         elif model_name.startswith('claude'):
-            return ChatAnthropic(model=model_name)
+            llm = ChatAnthropic(model=model_name)
         else:
             raise ValueError(f"Unsupported model: {model_name}")
+        
+        if llm is None:
+            print(f"LLM for model {model_name} is None")
+        return llm
 
     def create_rag_tool(self):
         return RagTool(
@@ -97,8 +103,9 @@ class BookReviewCrew:
             role=config['role'],
             goal=config['goal'],
             backstory=config['backstory'],
+            tools=[self.rag_tool],
             verbose=True,
-            llm=self.get_llm('gpt-4o-mini'),
+            llm=self.get_llm('gpt-4o'),
             max_iterations=100,
             timeout=120
         )
@@ -147,25 +154,6 @@ class BookReviewCrew:
             agent=self.rag_system_manager(),
             expected_output=config['expected_output']
         )
-    """
-    @task
-    def update_data_task(self, identifier: str, new_data: str) -> Task:
-        config = self.tasks_config['update_data_task']
-        return Task(
-            description=f"{config['description']}: Update '{identifier}' with {new_data}",
-            agent=self.rag_system_manager(),
-            expected_output=config['expected_output']
-        )
-
-    @task
-    def delete_data_task(self, identifier: str) -> Task:
-        config = self.tasks_config['delete_data_task']
-        return Task(
-            description=f"{config['description']}: Delete data with identifier '{identifier}'",
-            agent=self.rag_system_manager(),
-            expected_output=config['expected_output']
-        )
-    """
 
     @task
     def handle_user_query(self) -> Task:
@@ -176,25 +164,77 @@ class BookReviewCrew:
             expected_output=config['expected_output']
         )
 
+    @task
+    def continuous_chat(self) -> Task:
+        config = self.tasks_config['continuous_chat']
+        return Task(
+            description=config['description'],
+            agent=self.chat_interface(),
+            expected_output=config['expected_output'],
+            human_input=True
+        )
+
     @crew
     def crew(self) -> Crew:
         """Creates the Book Review Crew"""
+        agent_methods = [
+            self.searcher_goodreads,
+            self.reddit_reviewer,
+            self.data_processor,
+            self.rag_system_manager,
+            self.chat_interface
+        ]
+        
+        agents = []
+        for i, agent_method in enumerate(agent_methods):
+            agent = agent_method()
+            if agent is None:
+                print(f"Agent at index {i} ({agent_method.__name__}) is None.")
+            agents.append(agent)
+
+        # Check if any agent is None
+        for i, agent in enumerate(agents):
+            if agent is None:
+                raise ValueError(f"Agent at index {i} is None. Check the agent creation method: {agent_methods[i].__name__}")
+
+        tasks = [
+            self.gather_goodreads_reviews_task(),
+            self.gather_reddit_reviews_task(),
+            self.process_opinion_data(),
+            self.insert_data_task(),
+            self.query_database_task(),
+            self.handle_user_query(),
+            self.continuous_chat()
+        ]
+
+        # Check if any task is None
+        for i, task in enumerate(tasks):
+            if task is None:
+                raise ValueError(f"Task at index {i} is None. Check the task creation methods.")
+
         return Crew(
-            agents=[
-                self.searcher_goodreads(),
-                self.reddit_reviewer(),
-                self.data_processor(),
-                self.rag_system_manager(),
-                self.chat_interface()
-            ],
-            tasks=[
-                self.gather_goodreads_reviews_task(),
-                self.gather_reddit_reviews_task(),
-                self.process_opinion_data(),
-                self.insert_data_task(),
-                self.query_database_task(),
-                self.handle_user_query()
-            ],
+            agents=agents,
+            tasks=tasks,
             process=Process.sequential,
             verbose=True
         )
+
+    async def run(self):
+        crew_result = await self.crew().run()
+        print("Initial crew tasks completed.")
+        print(crew_result)
+
+        chat_task = self.continuous_chat()
+        
+        while True:
+            user_input = input("User: ")
+            if user_input.lower() == 'exit':
+                print("Chat ended.")
+                break
+                        
+            response = await chat_task.run()
+            print(f"Assistant: {response}")
+
+    # Remove or comment out the generate_response method if it's not being used
+    # async def generate_response(self, user_input):
+    #     ...
