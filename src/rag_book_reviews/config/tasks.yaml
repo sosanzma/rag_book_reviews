@@ -1,42 +1,15 @@
-gather_goodreads_reviews_task:
+scrape_book_info:
   description: >
     Find and summarize opinions from Goodreads reviews on the book: {book_title}. 
     Always include the name of the book, the author, and the Goodreads rating.
   expected_output: >
     Summaries of Goodreads reviews for the book and the links to the reviews.
 
-gather_reddit_reviews_task:
+interactive_qa:
   description: >
-    Find and summarize opinions from Reddit discussions for the book {book_title}. 
-    Provide the title of the book and the subreddit where the discussion is taking place.
+    Use the scraped information to interact with the user, answering any questions they may have about the book.
   expected_output: >
-    Summaries of Reddit discussions for the book and the links to the discussions. 
-    Mention the title of the book and the subreddit where the discussion is taking place.
-
-process_opinion_data:
-  description: Structure and prepare the collected opinions for storage in the vector database
-  expected_output: Processed and structured opinion data ready for database insertion
-
-insert_data_task:
-  description: Insert the processed data into the vector database
-  expected_output: Confirmation of successful data insertion or error details
-
-query_database_task:
-  description: Query the vector database with the given search query and return relevant results
-  expected_output: Relevant results from the database matching the query
-
-update_data_task:
-  description: Update existing data in the vector database with new information
-  expected_output: Confirmation of successful data update or error details
-
-delete_data_task:
-  description: Delete specified data from the vector database
-  expected_output: Confirmation of successful data deletion or error details
-
-handle_user_query:
-  description: Interact with the user, understand their query, and provide a response using the RAG system
-  expected_output: A relevant and informative response to the user's query about the book
-
-continuous_chat:
-  description: "Engage in a continuous conversation with the user, answering questions about books based on the gathered and processed information in the RAG system."
-  expected_output: "A relevant and informative response to the user's query about the book, based on the information in the RAG system."
+    Real-time responses to user questions about the book, based on the scraped information.
+  agent: qa_agent
+  allow_user_interaction: True
+  async_execution: True  # Allows for continuous, asynchronous interaction
