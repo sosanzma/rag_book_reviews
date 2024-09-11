@@ -1,10 +1,14 @@
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import DeepLake
-from config import ACTIVELOOP_ID, OPENAI_API_KEY
 import os
 
-os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
+from dotenv import load_dotenv
+load_dotenv()
+
+os.environ['OPENAI_API_KEY'] = os.getenv("OPENAI_API_KEY")
+os.environ['ACTIVELOOP_TOKEN'] = os.getenv("ACTIVELOOP_TOKEN")
+ACTIVELOOP_ID = os.getenv("ACTIVELOOP_ID")
 
 class VectorDB:
     def __init__(self, dataset_name):
