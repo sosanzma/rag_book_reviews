@@ -1,6 +1,5 @@
 from langchain.chains import RetrievalQAWithSourcesChain
-from langchain.chat_models import ChatOpenAI
-
+from langchain_openai import ChatOpenAI
 class BookChatInterface:
     def __init__(self, vector_db):
         self.llm = ChatOpenAI(model_name="gpt-4o-mini", temperature=0)
@@ -11,7 +10,7 @@ class BookChatInterface:
         )
 
     def get_response(self, question):
-        response = self.chain({"question": question})
+        response = self.chain.invoke({"question": question})
         return response
 
 # Example usage

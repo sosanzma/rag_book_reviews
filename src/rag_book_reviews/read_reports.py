@@ -1,11 +1,11 @@
 import os
 
-def read_reports(book_title):
+def read_reports():
     reports = {}
     report_types = ['goodreads', 'reddit']
     
     for report_type in report_types:
-        filename = f"{book_title}_{report_type}_report.txt".replace(" ", "_").lower()
+        filename = f"{report_type}_report.txt".replace(" ", "_").lower()
         filepath = os.path.join('Reports', filename)
         
         if os.path.exists(filepath):

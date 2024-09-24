@@ -1,6 +1,7 @@
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import DeepLake
+from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_community.vectorstores import DeepLake
+from langchain_openai import OpenAIEmbeddings as OpenAIEmbeddingsNew
 import os
 
 from dotenv import load_dotenv
@@ -12,15 +13,15 @@ ACTIVELOOP_ID = os.getenv("ACTIVELOOP_ID")
 
 class VectorDB:
     def __init__(self, dataset_name):
-        self.embeddings = OpenAIEmbeddings()
+        self.embeddings = OpenAIEmbeddingsNew()
         self.dataset_path = f"hub://{ACTIVELOOP_ID}/{dataset_name}"
         self.db = DeepLake(dataset_path=self.dataset_path, embedding_function=self.embeddings)
         self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
 
-    def add_reports(self, reports, book_title):
+    def add_reports(self, reports):
         for report_type, content in reports.items():
             chunks = self.text_splitter.split_text(content)
-            metadatas = [{"source": f"{book_title}_{report_type}", "book_title": book_title} for _ in chunks]
+            metadatas = [{"source": f"{report_type}"} for _ in chunks]
             self.db.add_texts(chunks, metadatas)
 
     def get_retriever(self):
