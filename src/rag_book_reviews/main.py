@@ -8,23 +8,21 @@ def main():
     # Initialize VectorDB
     vector_db = VectorDB("book_chat_db")
     
-    # Get book title from user
-    book_title = input("Enter the title of the book you want to chat about: ")
     
     # Read reports
-    reports = read_reports(book_title)
+    reports = read_reports()
     
     if not reports:
-        print(f"No reports found for '{book_title}'. Please check the book title and try again.")
+        print(f"No reports found. Please check the book title and try again.")
         return
     
     # Add reports to VectorDB
-    vector_db.add_reports(reports, book_title)
+    vector_db.add_reports(reports)
     
     # Initialize chat interface
     chat_interface = BookChatInterface(vector_db)
     
-    print(f"\nChat about {book_title}. Type 'exit' to end the chat.")
+    print(f"\nChat. Type 'exit' to end the chat.")
     
     while True:
         question = input("\nYour question: ")
