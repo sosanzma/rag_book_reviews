@@ -6,8 +6,7 @@ def read_reports():
     
     for report_type in report_types:
         filename = f"{report_type}_report.txt".replace(" ", "_").lower()
-        filepath = os.path.join('Reports', filename)
-        
+        filepath = os.path.join('reports', filename)
         if os.path.exists(filepath):
             with open(filepath, 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -17,7 +16,6 @@ def read_reports():
                 print(f"Warning: {filename} is empty.")
         else:
             print(f"Warning: {filename} not found.")
-    
     return reports
 
 # Example usage
