@@ -4,15 +4,25 @@ from langchain.prompts import PromptTemplate
 from rag_book_reviews.vector_db import VectorDB
 from typing import Dict, List
 
-
 class BookChatInterface:
     def __init__(self, database_name):
         self.vector_db = VectorDB(database_name)
-        self.llm = ChatOpenAI(model_name="gpt-4o-mini", temperature=0)
-        # Define a custom prompt template
+        self.llm = ChatOpenAI(model_name="gpt-4-0613", temperature=0)
+        
+        # Define an improved prompt template
         template = """Given the following extracted parts of a long document and a question, create a final answer with references.
         If you don't know the answer, just say that you don't know. Don't try to make up an answer.
         
+        Use the following format:
+        Question: [the question]
+        Relevant Information:
+        - [Book Title] (Source: [Goodreads/Reddit])
+          [Relevant information from the chunk]
+          [Goodreads Rating: X/5] (only for Goodreads sources)
+          [Links: [list of relevant links]]
+        
+        Answer: [Your detailed answer based on the relevant information]
+        Sources: [List of book titles and sources used]
 
         QUESTION: {question}
         =========
@@ -45,10 +55,18 @@ class BookChatInterface:
         sources = []
         if 'source_documents' in response:
             for doc in response['source_documents']:
-                if 'source' in doc.metadata:
-                    sources.append(doc.metadata['source'])
+                metadata = doc.metadata
+                if metadata['source'] == 'reddit':
+                    sources.extend(metadata.get('links', []))
+                else:  # assuming this is 'goodreads'
+                    link = metadata.get('link')
+                    if link:
+                        sources.append(link)
+        
+        # Remove duplicates and join
+        unique_sources = list(set(sources))
         
         return {
             "answer": answer,
-            "sources": "\n".join(set(sources)) if sources else ""
+            "sources": "\n".join(unique_sources) if unique_sources else ""
         }
