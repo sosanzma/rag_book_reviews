@@ -16,12 +16,19 @@ async def main(message: cl.Message):
     try:
         response = chat_interface.get_response(message.content)
         
-        answer_msg = cl.Message(content=response)
+        # Send the main answer
+        answer_msg = cl.Message(content=response['answer'])
         await answer_msg.send()
         
+        # If sources are available, send them as a separate message
+        if response['sources']:
+            sources_msg = cl.Message(content=f"Sources:\n{response['sources']}")
+            await sources_msg.send()
+        else:
+            no_sources_msg = cl.Message(content="No specific sources found for this information.")
+            await no_sources_msg.send()
+
         await thinking_msg.remove()
-        answer2_msg = cl.Message(content=response['sources'])
-        await answer2_msg.send()
     except Exception as e:
         error_msg = cl.Message(content=f"An error occurred: {str(e)}")
         await error_msg.send()

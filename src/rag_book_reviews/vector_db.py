@@ -61,17 +61,19 @@ class VectorDB:
                 for title, book_data in self.book_metadata.items():
                     if title in chunk:
                         metadata.update(book_data)
-                        metadata = {"source": book_data['link']}
+                        metadata.update({"source": book_data['link']})
                         print(metadata)
                         break
                 metadatas.append(metadata)
-            print("METADATOS",metadatas)
+            print("METADATOS",metadatas) 
             self.db.add_texts(chunks, metadatas)
         print(f"Added {len(chunks)} chunks to the database.")
 
     def get_retriever(self):
-        return self.db.as_retriever()
-
+        return self.db.as_retriever(
+            search_type="similarity",
+            search_kwargs={"k": 1}
+        )
     def extract_book_title(self, text: str) -> str:
         match = re.search(r'"([^"]+)"', text)
         return match.group(1) if match else None
