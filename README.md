@@ -16,7 +16,7 @@ src/
         ├── __init__.py
         ├── vector_db.py
         ├── chat_interface.py
-        ├── main.py
+        ├── chainlit_app.py
         ├── populate_db.py
         └── read_reports.py
 ```
@@ -27,7 +27,7 @@ src/
 2. `chat_interface.py`: Implements the chatbot interface using LangChain and OpenAI's GPT model.
 3. `read_reports.py`: Reads and processes the Goodreads and Reddit reports.
 4. `populate_db.py`: Populates the vector database with the processed reports.
-5. `main.py`: The entry point of the application, integrating Chainlit for the chat interface.
+5. `chainlit_app.py`: The entry point of the application, integrating Chainlit for the chat interface.
 
 ## Setup and Installation
 
@@ -59,7 +59,7 @@ src/
 
 2. Run the chatbot using Chainlit:
    ```
-   chainlit run src/rag_book_reviews/main.py
+   chainlit run src/rag_book_reviews/chainlit_app.py
    ```
 
 This will start the Chainlit server and open the chat interface in your default web browser.
@@ -70,7 +70,7 @@ This will start the Chainlit server and open the chat interface in your default 
 2. The `chat_interface.py` uses LangChain and OpenAI's GPT model to create a retrieval-based question-answering system.
 3. When a user asks a question, the system uses a RetrievalQAWithSourcesChain to retrieve relevant information from the vector database.
 4. The retrieved information is used to generate an informed response, and the sources of the information are also returned.
-5. The Chainlit interface in `main.py` provides a user-friendly chat experience, allowing users to interact with the chatbot seamlessly and view the sources of the information provided.
+5. The Chainlit interface in `chainlit_app.py` provides a user-friendly chat experience, allowing users to interact with the chatbot seamlessly and view the sources of the information provided.
 
 ## Features
 
