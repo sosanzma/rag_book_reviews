@@ -81,19 +81,12 @@ This will start the Chainlit server and open the chat interface in your default 
 - User-friendly chat interface powered by Chainlit
 - Comprehensive book reviews and opinions from Goodreads and Reddit
 
-## Next Steps
 
-1. Expand the database with more book reviews and genres
-2. Implement user authentication for personalized experiences
-3. Add features like book recommendations based on user preferences
-4. Optimize the retrieval process for faster response times
-5. Implement caching mechanisms to improve performance
-6. Enhance the display of source information in the Chainlit interface
 
-## Contributing
+## See it in action 
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+### Goodreads and English questions
+![RAG Book Reviews Chatbot Demo](gifs/gif_1.gif)
 
-## License
-
-This project is licensed under the MIT License.
+### Reddit and Spanish questions 
+![RAG Book Reviews Chatbot Demo](gifs/gif_2.gif)
